@@ -3,6 +3,66 @@ html(lang="en")
     head
         meta(charset="UTF-8")
         meta(name="viewport", content="width=device-width, initial-scale=1.0")
-        title Document
+        link(rel="stylesheet", href="style/style.css")
+        title Display Visualization
     body
-        p This is just a template.
+        h1 Screen Tearing, Double Buffering and Triple Buffering
+        #screen-tearing
+            h2 Screen Tearing
+            p Screen Tearing is a display artifact in which the screen shows data from multiple frames in a single draw/refresh. This usually occurs when the video feed from the GPU to the screen is not synchronized with the display's refresh rate.
+            p As an example, the "screen" has it's refresh rate set as 50Hz (slowed down by 100x, so the screen will refresh every 2 seconds), while the program can output between 45fps and 55fps (also slowed down by 100x)
+
+            canvas#sync-st.sync
+
+            .visual
+                .wrapper
+                    canvas#screen-st
+                    span Screen (what is shown to the user)
+                .wrapper
+                    canvas#back-st
+                    span Buffer (what is drawn behind the scenes)
+        #double-buffering
+            h2 Double Buffering
+            p To prevent screen tearing, double buffering is used. This is a technique in which two buffers are used to hold the image data: the "front" buffer, and the "back" buffer.
+            p The front buffer is the image that is displayed on the user's screen, while the back buffer is where the next frame of the image is drawn.
+            p Once the drawing is complete, the front and back buffers are swapped, and the newly swapped front buffer is displayed onto the screen.
+            p The swapping and displaying of the new frame are done in a way that is synchronized with the display's refresh rate to minimize screen tearing.
+            p Note that the swapping between the two buffers can take a few miliseconds in real time, during which, the program must wait until the two buffers are swapped. An artificial 300ms delay is added to simulate this.
+            p The example below has the screen set to 50Hz, and the program outputting between 40 and 60FPS (time slowed down by 100x).
+
+            canvas#sync-db.sync
+
+            .visual
+                .wrapper
+                    canvas#screen-db
+                    span Screen (what is shown to the user)
+                .wrapper
+                    canvas#front-db
+                    span Front buffer (what would be shown to the screen on the next refresh)
+                .wrapper
+                    canvas#back-db
+                    span Back buffer (what is drawn behind the scenes)
+        #triple-buffering
+            h2 Triple buffering
+            p You might have noticed in the example above is how the screen seems to sometimes stutter or even drop frames. This is due to the delay between the swapping and the varied time it took for the program to finish drawing to the back buffer, which can happens because of factors like stability issue or problems with the software.
+            p To minimize this, triple buffering can be use. The main difference between triple buffering and double buffering is that triple buffer uses two back buffers.
+            p In triple buffering, the program can immediately start drawing in the back buffer that is not being swapped with the front buffer. So for instance, if the second back buffer is being swapped with the screen, then the program can draw to the first back buffer without having to wait for the swapping to finish.
+            p With this, the amount of stuttering is reduced, leading to a smoother experience compared to double buffering.
+            p The example below has the screen set to 50Hz, the program outputting between 40 and 60FPS, and the 300ms artificial delay between the swapping of the buffers (time slowed down by 100x).
+            
+            canvas#sync-tb.sync
+
+            .visual
+                .wrapper
+                    canvas#screen-tb
+                    span Screen (what is shown to the user)
+                .wrapper
+                    canvas#front-tb
+                    span Front buffer (what would be shown to the screen on the next refresh)
+                .wrapper
+                    canvas#back1-tb
+                    span Back buffer 1 (what is drawn behind the scenes)
+                .wrapper
+                    canvas#back2-tb
+                    span Back buffer 2 (what is drawn behind the scenes)
+        script(src="script/script.js" deter)
